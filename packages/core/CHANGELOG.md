@@ -1,5 +1,12 @@
 # @czb-ui/core
 
+## 2.0.0-next.19
+
+### Minor Changes
+
+- 2023441: Rename NextJSThemeProvider to ExperimentalThemeV2Provider
+- 2023441: ExperimentalThemeV2Provider now has mode prop to set theme
+
 ## 2.0.0-next.18
 
 ### Patch Changes
