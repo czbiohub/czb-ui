@@ -45,8 +45,10 @@ const createThemeFromMode = (themeMode: ThemeMode) => {
 
 // CustomThemeProvider component to wrap your app
 export const ExperimentalThemeV2Provider = ({
+  autoMode = false,
   children,
 }: {
+  autoMode?: boolean;
   children: ReactNode;
 }) => {
   const [theme, setTheme] = useState<Theme>(createThemeFromMode("light"));
@@ -56,6 +58,8 @@ export const ExperimentalThemeV2Provider = ({
   };
 
   useEffect(() => {
+    if (!autoMode) return;
+
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
     // Set initial theme based on system preference
@@ -72,7 +76,7 @@ export const ExperimentalThemeV2Provider = ({
     return () => {
       mediaQuery.removeEventListener("change", handleThemeChange);
     };
-  }, []);
+  }, [autoMode]);
 
   return (
     <MuiThemeProvider theme={theme}>
