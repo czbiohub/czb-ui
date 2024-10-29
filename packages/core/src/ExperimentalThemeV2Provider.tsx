@@ -44,7 +44,11 @@ const createThemeFromMode = (themeMode: ThemeMode) => {
 };
 
 // CustomThemeProvider component to wrap your app
-export const NextJSThemeProvider = ({ children }: { children: ReactNode }) => {
+export const ExperimentalThemeV2Provider = ({
+  children,
+}: {
+  children: ReactNode;
+}) => {
   const [theme, setTheme] = useState<Theme>(createThemeFromMode("light"));
 
   const updateTheme = (themeMode: ThemeMode) => {
