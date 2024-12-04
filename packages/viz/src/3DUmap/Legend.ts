@@ -48,7 +48,7 @@ export class Legend {
       colorBox.style.border = "1px solid #ccc";
 
       const label = document.createElement("span");
-      label.textContent = category;
+      label.textContent = category.replace(/_/g, " ");
       label.style.fontSize = "14px";
       label.style.textShadow = `
         -1px -1px 0 white,

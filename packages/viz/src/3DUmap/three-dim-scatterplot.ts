@@ -60,7 +60,7 @@ export class ThreeDimScatterPlot {
     this.layerManager = new LayerManager();
     this.shaderMaterial = new THREE.ShaderMaterial({
       uniforms: {
-        size: { value: 0.12 },
+        size: { value: 0.3 },
       },
       vertexShader: vertexShader,
       fragmentShader: fragmentShader,
@@ -87,11 +87,18 @@ export class ThreeDimScatterPlot {
       stencil: false,
       depth: false,
     });
+
+    // Get the device pixel ratio
+    const pixelRatio = window.devicePixelRatio;
+
+    // Set pixel ratio for high DPI displays
+    this.renderer.setPixelRatio(pixelRatio);
     this.renderer.setSize(element.clientWidth, element.clientHeight);
     this.renderer.setClearColor(0xffffff, 1);
     element.appendChild(this.renderer.domElement);
 
     this.composer = new EffectComposer(this.renderer);
+
     this.composer.addPass(new RenderPass(this.scene, this.camera));
     this.composer.addPass(
       new EffectPass(
@@ -144,6 +151,14 @@ export class ThreeDimScatterPlot {
     // Auto rotating toggle
     this.gui.add(this.controls, "autoRotate").name("Auto rotate");
 
+    // Add rotate speed control
+    this.gui
+      .add(this.controls, "autoRotateSpeed")
+      .min(0.1)
+      .max(10)
+      .step(0.1)
+      .name("Rotate speed");
+
     // Colors dropdown
     const colorItems = this.layerManager.getLayerLabelIdLookup("colors");
     this.gui
@@ -194,7 +209,7 @@ export class ThreeDimScatterPlot {
     // multi-select dropdowns, we can't have
     // multiple attributes selected at once.
 
-    this.gui.destroy();
+    // this.gui.destroy();
   }
 
   setGuiContainer(element: HTMLDivElement) {
@@ -205,6 +220,10 @@ export class ThreeDimScatterPlot {
   updateViewportSize(width: number, height: number) {
     this.renderer.setSize(width, height);
     this.composer.setSize(width, height);
+
+    // Make sure to update pixel ratio when viewport changes
+    const pixelRatio = window.devicePixelRatio;
+    this.renderer.setPixelRatio(pixelRatio);
 
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
