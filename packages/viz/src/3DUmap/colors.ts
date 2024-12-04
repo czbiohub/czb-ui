@@ -1,6 +1,6 @@
 import { scaleSequential, rgb, interpolateViridis } from "d3";
 
-const GREYED_COLOR = [64, 64, 64];
+const GREYED_COLOR = [220, 220, 220];
 const HIGHLIGHT_COLOR = [255, 255, 0];
 
 function convertIntTypedArrayToCategoryColors(
