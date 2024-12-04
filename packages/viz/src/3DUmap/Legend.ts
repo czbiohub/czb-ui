@@ -50,6 +50,12 @@ export class Legend {
       const label = document.createElement("span");
       label.textContent = category;
       label.style.fontSize = "14px";
+      label.style.textShadow = `
+        -1px -1px 0 white,
+        1px -1px 0 white,
+        -1px 1px 0 white,
+        1px 1px 0 white
+      `;
 
       row.appendChild(colorBox);
       row.appendChild(label);
