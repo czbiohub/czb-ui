@@ -7,11 +7,13 @@ export class Legend {
   constructor() {
     this.container = document.createElement("div");
     this.container.style.position = "absolute";
-    this.container.style.top = "20px";
-    this.container.style.left = "20px";
-    this.container.style.backgroundColor = "rgba(255, 255, 255, 0.9)";
-    this.container.style.padding = "10px";
-    this.container.style.borderRadius = "5px";
+    this.container.style.top = "0";
+    this.container.style.left = "0";
+    this.container.style.margin = "24px";
+    this.container.style.padding = "28px";
+
+    this.container.style.zIndex = "2";
+    this.container.style.borderRadius = "4px";
     this.container.style.overflowY = "auto";
   }
 
@@ -25,7 +27,11 @@ export class Legend {
 
     this.container.style.display = "block";
 
-    categories.forEach((category, index) => {
+    const sortedCategories = [...categories].sort((a, b) =>
+      a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" })
+    );
+
+    sortedCategories.forEach((category, index) => {
       const row = document.createElement("div");
       row.style.display = "flex";
       row.style.alignItems = "center";
@@ -36,7 +42,8 @@ export class Legend {
       colorBox.style.height = "20px";
       colorBox.style.marginRight = "8px";
 
-      const color = rgb(this.colorScale(index.toString()));
+      const originalIndex = categories.indexOf(category);
+      const color = rgb(this.colorScale(originalIndex.toString()));
       colorBox.style.backgroundColor = `rgb(${color.r}, ${color.g}, ${color.b})`;
       colorBox.style.border = "1px solid #ccc";
 
