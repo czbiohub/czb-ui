@@ -193,6 +193,8 @@ export class ThreeDimScatterPlot {
     // As of now since lil-gui doesn't have
     // multi-select dropdowns, we can't have
     // multiple attributes selected at once.
+
+    this.gui.destroy();
   }
 
   setGuiContainer(element: HTMLDivElement) {
