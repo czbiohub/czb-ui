@@ -1,4 +1,4 @@
-import { scaleSequential, rgb, interpolateCool } from "d3";
+import { scaleSequential, rgb, interpolateViridis } from "d3";
 
 const GREYED_COLOR = [64, 64, 64];
 const HIGHLIGHT_COLOR = [255, 255, 0];
@@ -10,7 +10,7 @@ function convertIntTypedArrayToCategoryColors(
   colorHighlightIndex?: number
 ): Uint8Array {
   // intTypedArray looks like [0, 0, 2, 1, 2] where each number is a category
-  const colorScale = scaleSequential(interpolateCool);
+  const colorScale = scaleSequential(interpolateViridis);
 
   const categoryColors = new Uint8Array(intTypedArray.length * 3);
   for (let i = 0; i < intTypedArray.length; i++) {

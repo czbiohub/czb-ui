@@ -86,6 +86,7 @@ export class ThreeDimScatterPlot {
       depth: false,
     });
     this.renderer.setSize(element.clientWidth, element.clientHeight);
+    this.renderer.setClearColor(0xffffff, 1);
     element.appendChild(this.renderer.domElement);
 
     this.composer = new EffectComposer(this.renderer);
