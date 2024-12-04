@@ -1,4 +1,4 @@
-import { scaleSequential, rgb, interpolateViridis } from "d3";
+import { rgb, scaleOrdinal, schemeTableau10 } from "d3";
 
 const GREYED_COLOR = [220, 220, 220];
 const HIGHLIGHT_COLOR = [255, 255, 0];
@@ -10,7 +10,7 @@ function convertIntTypedArrayToCategoryColors(
   colorHighlightIndex?: number
 ): Uint8Array {
   // intTypedArray looks like [0, 0, 2, 1, 2] where each number is a category
-  const colorScale = scaleSequential(interpolateViridis);
+  const colorScale = scaleOrdinal(schemeTableau10);
 
   const categoryColors = new Uint8Array(intTypedArray.length * 3);
   for (let i = 0; i < intTypedArray.length; i++) {
@@ -25,15 +25,13 @@ function convertIntTypedArrayToCategoryColors(
       if (colorHighlightIndex === undefined) {
         throw new Error("colorHighlightIndex is required in highlight mode");
       }
-      const color = rgb(
-        colorScale(colorHighlightIndex / colorHighlightMaxValue)
-      );
+      const color = rgb(colorScale(colorHighlightIndex.toString()));
       categoryColors[i * 3] = color.r;
       categoryColors[i * 3 + 1] = color.g;
       categoryColors[i * 3 + 2] = color.b;
       continue;
     }
-    const color = rgb(colorScale(value / colorHighlightMaxValue));
+    const color = rgb(colorScale(value.toString()));
     categoryColors[i * 3] = color.r;
     categoryColors[i * 3 + 1] = color.g;
     categoryColors[i * 3 + 2] = color.b;
