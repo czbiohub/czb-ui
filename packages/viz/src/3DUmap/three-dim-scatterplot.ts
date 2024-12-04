@@ -12,6 +12,7 @@ import {
   EffectPass,
   RenderPass,
 } from "postprocessing";
+import { Legend } from "./Legend";
 
 const vertexShader = `
 uniform float size;
@@ -51,6 +52,7 @@ export class ThreeDimScatterPlot {
   private guiElement: HTMLDivElement | undefined = undefined;
   private geometry: THREE.BufferGeometry | null = null;
   private composer: EffectComposer;
+  private legend: Legend;
   debug = false;
 
   constructor(element: HTMLDivElement) {
@@ -58,7 +60,7 @@ export class ThreeDimScatterPlot {
     this.layerManager = new LayerManager();
     this.shaderMaterial = new THREE.ShaderMaterial({
       uniforms: {
-        size: { value: 0.05 },
+        size: { value: 0.12 },
       },
       vertexShader: vertexShader,
       fragmentShader: fragmentShader,
@@ -100,6 +102,9 @@ export class ThreeDimScatterPlot {
         })
       )
     );
+
+    this.legend = new Legend();
+    element.appendChild(this.legend.getElement());
 
     this.refreshGui();
 
@@ -313,13 +318,17 @@ export class ThreeDimScatterPlot {
       attributesLength,
     } = await layer.getTypedArrayWithSelectedAttributeFiltered();
 
-    this.log("attributesLength: " + attributesLength);
-
     const inHighlightMode = layer.selectedAttribute !== "None";
 
     if (colorCategories instanceof Float32Array) {
       throw new Error("Color categories must be an Int32Array");
     }
+
+    // Get attributes for legend
+    const attributes = await layer.getAttributes();
+    this.legend.update(attributes, inHighlightMode);
+
+    this.log("attributesLength: " + attributesLength);
 
     if (inHighlightMode) {
       this.log(
@@ -344,6 +353,9 @@ export class ThreeDimScatterPlot {
     if (!this.geometry) {
       throw new Error("Geometry is not initialized. Call drawPoints first.");
     }
+
+    // Hide the legend when colors are disabled
+    this.legend.update(null);
 
     // Set the color attribute to a default value (white color)
     const defaultColor = new Float32Array(
