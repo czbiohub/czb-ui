@@ -1,7 +1,7 @@
 import { rgb, scaleOrdinal, schemeTableau10 } from "d3";
 
 const GREYED_COLOR = [220, 220, 220];
-const HIGHLIGHT_COLOR = [255, 255, 0];
+const HIGHLIGHT_COLOR = [0, 0, 0];
 
 function convertIntTypedArrayToCategoryColors(
   intTypedArray: Int32Array,
@@ -25,10 +25,9 @@ function convertIntTypedArrayToCategoryColors(
       if (colorHighlightIndex === undefined) {
         throw new Error("colorHighlightIndex is required in highlight mode");
       }
-      const color = rgb(colorScale(colorHighlightIndex.toString()));
-      categoryColors[i * 3] = color.r;
-      categoryColors[i * 3 + 1] = color.g;
-      categoryColors[i * 3 + 2] = color.b;
+      categoryColors[i * 3] = HIGHLIGHT_COLOR[0];
+      categoryColors[i * 3 + 1] = HIGHLIGHT_COLOR[1];
+      categoryColors[i * 3 + 2] = HIGHLIGHT_COLOR[2];
       continue;
     }
     const color = rgb(colorScale(value.toString()));
