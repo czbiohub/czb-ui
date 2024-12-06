@@ -347,7 +347,7 @@ export class ThreeDimScatterPlot {
 
     // Get attributes for legend
     const attributes = await layer.getAttributes();
-    this.legend.update(attributes, inHighlightMode);
+    this.legend.update(attributes, colorCategories, inHighlightMode);
 
     this.log("attributesLength: " + attributesLength);
 
@@ -376,7 +376,7 @@ export class ThreeDimScatterPlot {
     }
 
     // Hide the legend when colors are disabled
-    this.legend.update(null);
+    this.legend.update(null, null, false);
 
     // Set the color attribute to a default value (white color)
     const defaultColor = new Float32Array(
