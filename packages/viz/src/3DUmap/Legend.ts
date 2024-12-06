@@ -27,11 +27,7 @@ export class Legend {
 
     this.container.style.display = "block";
 
-    const sortedCategories = [...categories].sort((a, b) =>
-      a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" })
-    );
-
-    sortedCategories.forEach((category, index) => {
+    categories.forEach((category, index) => {
       const row = document.createElement("div");
       row.style.display = "flex";
       row.style.alignItems = "center";
@@ -42,8 +38,7 @@ export class Legend {
       colorBox.style.height = "20px";
       colorBox.style.marginRight = "8px";
 
-      const originalIndex = categories.indexOf(category);
-      const color = rgb(this.colorScale(originalIndex.toString()));
+      const color = rgb(this.colorScale(index.toString()));
       colorBox.style.backgroundColor = `rgb(${color.r}, ${color.g}, ${color.b})`;
       colorBox.style.border = "1px solid #ccc";
 
