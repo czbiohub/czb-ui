@@ -53,9 +53,9 @@ export class ThreeDimScatterPlot {
   private composer: EffectComposer;
   private bloomParams = {
     threshold: 0,
-    strength: 2,
+    strength: 0.5,
     radius: 0.5,
-    exposure: 1,
+    exposure: 1.3,
   };
   debug = false;
 
@@ -64,7 +64,7 @@ export class ThreeDimScatterPlot {
     this.layerManager = new LayerManager();
     this.shaderMaterial = new THREE.ShaderMaterial({
       uniforms: {
-        size: { value: 0.05 },
+        size: { value: 0.15 },
       },
       vertexShader: vertexShader,
       fragmentShader: fragmentShader,
