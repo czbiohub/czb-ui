@@ -6,12 +6,10 @@ import { UserAttributes } from "zarr/types/types";
 import GUI from "lil-gui";
 import { LayerManager } from "./layer";
 import { convertIntTypedArrayToCategoryColors } from "./colors";
-import {
-  BloomEffect,
-  EffectComposer,
-  EffectPass,
-  RenderPass,
-} from "postprocessing";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 
 const vertexShader = `
 uniform float size;
@@ -35,7 +33,9 @@ void main() {
         discard;
     }
 
-    gl_FragColor = vec4(vColor, 1.0);
+    // Make points brighter
+    vec3 brightColor = vColor * 1.5;
+    gl_FragColor = vec4(brightColor, 1.0);
 }
 `;
 
@@ -51,6 +51,12 @@ export class ThreeDimScatterPlot {
   private guiElement: HTMLDivElement | undefined = undefined;
   private geometry: THREE.BufferGeometry | null = null;
   private composer: EffectComposer;
+  private bloomParams = {
+    threshold: 0,
+    strength: 2,
+    radius: 0.5,
+    exposure: 1,
+  };
   debug = false;
 
   constructor(element: HTMLDivElement) {
@@ -63,6 +69,7 @@ export class ThreeDimScatterPlot {
       vertexShader: vertexShader,
       fragmentShader: fragmentShader,
       transparent: true,
+      blending: THREE.AdditiveBlending,
     });
 
     this.scene = new THREE.Scene();
@@ -85,19 +92,24 @@ export class ThreeDimScatterPlot {
       stencil: false,
     });
     this.renderer.setSize(element.clientWidth, element.clientHeight);
+    this.renderer.toneMapping = THREE.ReinhardToneMapping;
+    this.renderer.toneMappingExposure = 1;
     element.appendChild(this.renderer.domElement);
 
-    this.composer = new EffectComposer(this.renderer);
-    this.composer.addPass(new RenderPass(this.scene, this.camera));
-    this.composer.addPass(
-      new EffectPass(
-        this.camera,
-        new BloomEffect({
-          luminanceThreshold: 0,
-          mipmapBlur: true,
-        })
-      )
+    const renderScene = new RenderPass(this.scene, this.camera);
+    const bloomPass = new UnrealBloomPass(
+      new THREE.Vector2(element.clientWidth, element.clientHeight),
+      this.bloomParams.strength,
+      this.bloomParams.radius,
+      this.bloomParams.threshold
     );
+
+    const outputPass = new OutputPass();
+
+    this.composer = new EffectComposer(this.renderer);
+    this.composer.addPass(renderScene);
+    this.composer.addPass(bloomPass);
+    this.composer.addPass(outputPass);
 
     this.refreshGui();
 
@@ -108,14 +120,9 @@ export class ThreeDimScatterPlot {
   }
 
   private async animate() {
-    // Use bind to ensure `this` inside animate() always refers to the ThreeDimScatterPlot instance,
-    // even when the method is passed as a callback to requestAnimationFrame.
     requestAnimationFrame(this.animate.bind(this));
-    this.composer.render();
-
     this.controls.update();
-
-    this.renderer.render(this.scene, this.camera);
+    this.composer.render();
   }
 
   private async refreshGui() {
@@ -186,6 +193,51 @@ export class ThreeDimScatterPlot {
     // As of now since lil-gui doesn't have
     // multi-select dropdowns, we can't have
     // multiple attributes selected at once.
+
+    // Add bloom controls
+    const bloomFolder = this.gui.addFolder("Bloom");
+
+    bloomFolder
+      .add(this.bloomParams, "threshold", 0.0, 1.0)
+      .onChange((value: number) => {
+        const bloomPass = this.composer.passes.find(
+          (pass) => pass instanceof UnrealBloomPass
+        ) as UnrealBloomPass;
+        if (bloomPass) {
+          bloomPass.threshold = value;
+        }
+      });
+
+    bloomFolder
+      .add(this.bloomParams, "strength", 0.0, 3.0)
+      .onChange((value: number) => {
+        const bloomPass = this.composer.passes.find(
+          (pass) => pass instanceof UnrealBloomPass
+        ) as UnrealBloomPass;
+        if (bloomPass) {
+          bloomPass.strength = value;
+        }
+      });
+
+    bloomFolder
+      .add(this.bloomParams, "radius", 0.0, 1.0)
+      .step(0.01)
+      .onChange((value: number) => {
+        const bloomPass = this.composer.passes.find(
+          (pass) => pass instanceof UnrealBloomPass
+        ) as UnrealBloomPass;
+        if (bloomPass) {
+          bloomPass.radius = value;
+        }
+      });
+
+    const toneMappingFolder = this.gui.addFolder("Tone Mapping");
+
+    toneMappingFolder
+      .add(this.bloomParams, "exposure", 0.1, 2)
+      .onChange((value: number) => {
+        this.renderer.toneMappingExposure = Math.pow(value, 4.0);
+      });
   }
 
   setGuiContainer(element: HTMLDivElement) {
