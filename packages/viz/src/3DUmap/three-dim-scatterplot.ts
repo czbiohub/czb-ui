@@ -58,6 +58,7 @@ export class ThreeDimScatterPlot {
     exposure: 1.3,
   };
   debug = false;
+  private showAdvanced = false;
 
   constructor(element: HTMLDivElement) {
     this.particleSystem = null;
@@ -119,6 +120,7 @@ export class ThreeDimScatterPlot {
     this.composer.addPass(outputPass);
 
     this.refreshGui();
+    this.setupAdvancedControls();
 
     // TODO: WebGL compatibility check
     // https://threejs.org/docs/index.html#manual/en/introduction/WebGL-compatibility-check
@@ -139,33 +141,35 @@ export class ThreeDimScatterPlot {
     }
     this.gui = new GUI({ container: this.guiElement });
 
-    // Add some controls
-    // Point size
-    this.gui
-      .add(this.shaderMaterial.uniforms.size, "value")
-      .min(0.01)
-      .max(1)
-      .step(0.01)
-      .name("Point size");
-
-    // Auto rotating toggle
+    // Auto rotating toggle (keep this outside advanced)
     this.gui.add(this.controls, "autoRotate").name("Auto rotate");
 
-    // Add rotate speed control
-    this.gui
-      .add(this.controls, "autoRotateSpeed", 0.1, 10, 0.1)
-      .setValue(1.3)
-      .name("Rotate speed");
+    // Advanced controls folder
+    let advancedFolder: GUI | undefined;
+    if (this.showAdvanced) {
+      advancedFolder = this.gui.addFolder("Advanced");
 
-    // Colors dropdown
+      // Point size
+      advancedFolder
+        .add(this.shaderMaterial.uniforms.size, "value")
+        .min(0.01)
+        .max(1)
+        .step(0.01)
+        .name("Point size");
+
+      // Rotate speed
+      advancedFolder
+        .add(this.controls, "autoRotateSpeed", 0.1, 10, 0.1)
+        .setValue(1.3)
+        .name("Rotate speed");
+    }
+
+    // Colors dropdown (keep this outside advanced)
     const colorItems = this.layerManager.getLayerLabelIdLookup("colors");
     this.gui
       .add(this.layerManager.soloedLayers, "colors", colorItems)
       .onChange((layerId: number) => {
         this.layerManager.soloLayer("colors", layerId);
-        // The selectedAttribute dropdown
-        // would need to update, based on the
-        // color layer selected. So refresh the GUI
         this.refreshGui();
       })
       .name("Attributes");
@@ -177,80 +181,84 @@ export class ThreeDimScatterPlot {
 
     const currentLayerInstance =
       this.layerManager.getSoloedLayerInstance("colors");
-
     let currentColorAttributes = await currentLayerInstance.getAttributes();
-
-    // Copy the array so we can sort it and add "None" to it
-    currentColorAttributes = [...currentColorAttributes];
 
     if (!currentColorAttributes) {
       return;
     }
 
-    // Sort by alphabetical order (with smart numeric sorting)
-    // https://stackoverflow.com/a/38641281/10013136
+    currentColorAttributes = [...currentColorAttributes];
     currentColorAttributes.sort((a, b) =>
       a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" })
     );
-
-    // Append "None" option at the beginning
     currentColorAttributes.unshift("None");
 
-    // Attributes of current color dropdown
+    // Attributes of current color dropdown (keep this outside advanced)
     this.gui
       .add(currentLayerInstance, "selectedAttribute", currentColorAttributes)
       .onChange((attribute: string) => {
         currentLayerInstance.selectAttribute(attribute);
       })
       .name("Highlight");
-    // As of now since lil-gui doesn't have
-    // multi-select dropdowns, we can't have
-    // multiple attributes selected at once.
 
-    // Add bloom controls
-    const bloomFolder = this.gui.addFolder("Bloom");
+    // Add bloom and tone mapping controls to advanced section
+    if (this.showAdvanced && advancedFolder) {
+      // Bloom controls
+      advancedFolder
+        .add(this.bloomParams, "threshold", 0.0, 1.0)
+        .onChange((value: number) => {
+          const bloomPass = this.composer.passes.find(
+            (pass) => pass instanceof UnrealBloomPass
+          ) as UnrealBloomPass;
+          if (bloomPass) {
+            bloomPass.threshold = value;
+          }
+        })
+        .name("Bloom threshold");
 
-    bloomFolder
-      .add(this.bloomParams, "threshold", 0.0, 1.0)
-      .onChange((value: number) => {
-        const bloomPass = this.composer.passes.find(
-          (pass) => pass instanceof UnrealBloomPass
-        ) as UnrealBloomPass;
-        if (bloomPass) {
-          bloomPass.threshold = value;
-        }
-      });
+      advancedFolder
+        .add(this.bloomParams, "strength", 0.0, 3.0)
+        .onChange((value: number) => {
+          const bloomPass = this.composer.passes.find(
+            (pass) => pass instanceof UnrealBloomPass
+          ) as UnrealBloomPass;
+          if (bloomPass) {
+            bloomPass.strength = value;
+          }
+        })
+        .name("Bloom strength");
 
-    bloomFolder
-      .add(this.bloomParams, "strength", 0.0, 3.0)
-      .onChange((value: number) => {
-        const bloomPass = this.composer.passes.find(
-          (pass) => pass instanceof UnrealBloomPass
-        ) as UnrealBloomPass;
-        if (bloomPass) {
-          bloomPass.strength = value;
-        }
-      });
+      advancedFolder
+        .add(this.bloomParams, "radius", 0.0, 1.0)
+        .step(0.01)
+        .onChange((value: number) => {
+          const bloomPass = this.composer.passes.find(
+            (pass) => pass instanceof UnrealBloomPass
+          ) as UnrealBloomPass;
+          if (bloomPass) {
+            bloomPass.radius = value;
+          }
+        })
+        .name("Bloom radius");
 
-    bloomFolder
-      .add(this.bloomParams, "radius", 0.0, 1.0)
-      .step(0.01)
-      .onChange((value: number) => {
-        const bloomPass = this.composer.passes.find(
-          (pass) => pass instanceof UnrealBloomPass
-        ) as UnrealBloomPass;
-        if (bloomPass) {
-          bloomPass.radius = value;
-        }
-      });
+      advancedFolder
+        .add(this.bloomParams, "exposure", 0.1, 2)
+        .onChange((value: number) => {
+          this.renderer.toneMappingExposure = Math.pow(value, 4.0);
+        })
+        .name("Tone Mapping exposure");
+    }
+  }
 
-    const toneMappingFolder = this.gui.addFolder("Tone Mapping");
-
-    toneMappingFolder
-      .add(this.bloomParams, "exposure", 0.1, 2)
-      .onChange((value: number) => {
-        this.renderer.toneMappingExposure = Math.pow(value, 4.0);
-      });
+  private setupAdvancedControls() {
+    document.addEventListener("keydown", (event) => {
+      // Check for Cmd+A (Mac) or Ctrl+A (Windows/Linux)
+      if ((event.metaKey || event.ctrlKey) && event.key === "a") {
+        event.preventDefault(); // Prevent default select-all behavior
+        this.showAdvanced = true;
+        this.refreshGui();
+      }
+    });
   }
 
   setGuiContainer(element: HTMLDivElement) {
