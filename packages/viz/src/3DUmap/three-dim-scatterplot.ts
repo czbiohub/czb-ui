@@ -129,6 +129,8 @@ export class ThreeDimScatterPlot {
   }
 
   private async animate() {
+    // Use bind to ensure `this` inside animate() always refers to the ThreeDimScatterPlot instance,
+    // even when the method is passed as a callback to requestAnimationFrame.
     requestAnimationFrame(this.animate.bind(this));
     this.controls.update();
     this.composer.render();
@@ -170,6 +172,9 @@ export class ThreeDimScatterPlot {
       .add(this.layerManager.soloedLayers, "colors", colorItems)
       .onChange((layerId: number) => {
         this.layerManager.soloLayer("colors", layerId);
+        // The selectedAttribute dropdown
+        // would need to update, based on the
+        // color layer selected. So refresh the GUI
         this.refreshGui();
       })
       .name("Attributes");
@@ -181,16 +186,23 @@ export class ThreeDimScatterPlot {
 
     const currentLayerInstance =
       this.layerManager.getSoloedLayerInstance("colors");
+
     let currentColorAttributes = await currentLayerInstance.getAttributes();
+
+    // Copy the array so we can sort it and add "None" to it
+    currentColorAttributes = [...currentColorAttributes];
 
     if (!currentColorAttributes) {
       return;
     }
 
-    currentColorAttributes = [...currentColorAttributes];
+    // Sort by alphabetical order (with smart numeric sorting)
+    // https://stackoverflow.com/a/38641281/10013136
     currentColorAttributes.sort((a, b) =>
       a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" })
     );
+
+    // Append "None" option at the beginning
     currentColorAttributes.unshift("None");
 
     // Attributes of current color dropdown (keep this outside advanced)
@@ -200,6 +212,9 @@ export class ThreeDimScatterPlot {
         currentLayerInstance.selectAttribute(attribute);
       })
       .name("Highlight");
+    // As of now since lil-gui doesn't have
+    // multi-select dropdowns, we can't have
+    // multiple attributes selected at once.
 
     // Add bloom and tone mapping controls to advanced section
     if (this.showAdvanced && advancedFolder) {
