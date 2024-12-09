@@ -47,14 +47,6 @@ export class Legend {
       this.items.push({ name, color });
     });
 
-    // Sort items by name
-    this.items.sort((a, b) =>
-      a.name.localeCompare(b.name, undefined, {
-        numeric: true,
-        sensitivity: "base",
-      })
-    );
-
     // Render the sorted items
     this.render();
   }
