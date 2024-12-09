@@ -83,7 +83,6 @@ export class ThreeDimScatterPlot {
       powerPreference: "high-performance",
       antialias: false,
       stencil: false,
-      depth: false,
     });
     this.renderer.setSize(element.clientWidth, element.clientHeight);
     element.appendChild(this.renderer.domElement);
