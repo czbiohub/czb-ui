@@ -60,7 +60,7 @@ export class ThreeDimScatterPlot {
     this.layerManager = new LayerManager();
     this.shaderMaterial = new THREE.ShaderMaterial({
       uniforms: {
-        size: { value: 0.3 },
+        size: { value: 0.4 },
       },
       vertexShader: vertexShader,
       fragmentShader: fragmentShader,
@@ -153,10 +153,8 @@ export class ThreeDimScatterPlot {
 
     // Add rotate speed control
     this.gui
-      .add(this.controls, "autoRotateSpeed")
-      .min(0.1)
-      .max(10)
-      .step(0.1)
+      .add(this.controls, "autoRotateSpeed", 0.1, 10, 0.1)
+      .setValue(1.3)
       .name("Rotate speed");
 
     // Colors dropdown
@@ -209,7 +207,7 @@ export class ThreeDimScatterPlot {
     // multi-select dropdowns, we can't have
     // multiple attributes selected at once.
 
-    // this.gui.destroy();
+    this.gui.destroy();
   }
 
   setGuiContainer(element: HTMLDivElement) {
