@@ -91,7 +91,14 @@ export class ThreeDimScatterPlot {
       antialias: false,
       stencil: false,
     });
+
+    // Get the device pixel ratio
+    const pixelRatio = window.devicePixelRatio;
+
+    // Set pixel ratio for high DPI displays
+    this.renderer.setPixelRatio(pixelRatio);
     this.renderer.setSize(element.clientWidth, element.clientHeight);
+
     this.renderer.toneMapping = THREE.ReinhardToneMapping;
     this.renderer.toneMappingExposure = 1;
     element.appendChild(this.renderer.domElement);
