@@ -85,7 +85,6 @@ export class ThreeDimScatterPlot {
       powerPreference: "high-performance",
       antialias: false,
       stencil: false,
-      depth: false,
     });
 
     // Get the device pixel ratio
