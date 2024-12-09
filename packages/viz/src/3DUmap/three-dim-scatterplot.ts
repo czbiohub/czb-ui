@@ -151,6 +151,12 @@ export class ThreeDimScatterPlot {
     // Auto rotating toggle
     this.gui.add(this.controls, "autoRotate").name("Auto rotate");
 
+    // Add rotate speed control
+    this.gui
+      .add(this.controls, "autoRotateSpeed", 0.1, 10, 0.1)
+      .setValue(1.3)
+      .name("Rotate speed");
+
     // Colors dropdown
     const colorItems = this.layerManager.getLayerLabelIdLookup("colors");
     this.gui
