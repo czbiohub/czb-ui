@@ -55,7 +55,7 @@ export class ThreeDimScatterPlot {
     threshold: 0,
     strength: 0.5,
     radius: 0.5,
-    exposure: 1.3,
+    exposure: 0.7714,
   };
   debug = false;
   private showAdvanced = false;
