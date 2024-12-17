@@ -164,61 +164,8 @@ export class ThreeDimScatterPlot {
         .add(this.controls, "autoRotateSpeed", 0.1, 10, 0.1)
         .setValue(1.3)
         .name("Rotate speed");
-    }
 
-    // Colors dropdown (keep this outside advanced)
-    const colorItems = this.layerManager.getLayerLabelIdLookup("colors");
-    this.gui
-      .add(this.layerManager.soloedLayers, "colors", colorItems)
-      .onChange((layerId: number) => {
-        this.layerManager.soloLayer("colors", layerId);
-        // The selectedAttribute dropdown
-        // would need to update, based on the
-        // color layer selected. So refresh the GUI
-        this.refreshGui();
-      })
-      .name("Attributes");
-
-    // If colors is set to "None", don't show the selectedAttribute dropdown
-    if (this.layerManager.soloedLayers.colors === -1) {
-      return;
-    }
-
-    const currentLayerInstance =
-      this.layerManager.getSoloedLayerInstance("colors");
-
-    let currentColorAttributes = await currentLayerInstance.getAttributes();
-
-    // Copy the array so we can sort it and add "None" to it
-    currentColorAttributes = [...currentColorAttributes];
-
-    if (!currentColorAttributes) {
-      return;
-    }
-
-    // Sort by alphabetical order (with smart numeric sorting)
-    // https://stackoverflow.com/a/38641281/10013136
-    currentColorAttributes.sort((a, b) =>
-      a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" })
-    );
-
-    // Append "None" option at the beginning
-    currentColorAttributes.unshift("None");
-
-    // Attributes of current color dropdown (keep this outside advanced)
-    this.gui
-      .add(currentLayerInstance, "selectedAttribute", currentColorAttributes)
-      .onChange((attribute: string) => {
-        currentLayerInstance.selectAttribute(attribute);
-      })
-      .name("Highlight");
-    // As of now since lil-gui doesn't have
-    // multi-select dropdowns, we can't have
-    // multiple attributes selected at once.
-
-    // Add bloom and tone mapping controls to advanced section
-    if (this.showAdvanced && advancedFolder) {
-      // Bloom controls
+      // Add bloom and tone mapping controls here, outside of the color attributes logic
       advancedFolder
         .add(this.bloomParams, "threshold", 0.0, 1.0)
         .onChange((value: number) => {
@@ -263,6 +210,53 @@ export class ThreeDimScatterPlot {
         })
         .name("Tone Mapping exposure");
     }
+
+    // Colors dropdown (keep this outside advanced)
+    const colorItems = this.layerManager.getLayerLabelIdLookup("colors");
+    this.gui
+      .add(this.layerManager.soloedLayers, "colors", colorItems)
+      .onChange((layerId: number) => {
+        this.layerManager.soloLayer("colors", layerId);
+        this.refreshGui();
+      })
+      .name("Attributes");
+
+    // If colors is set to "None", don't show the selectedAttribute dropdown
+    if (this.layerManager.soloedLayers.colors === -1) {
+      return;
+    }
+
+    const currentLayerInstance =
+      this.layerManager.getSoloedLayerInstance("colors");
+
+    let currentColorAttributes = await currentLayerInstance.getAttributes();
+
+    // Copy the array so we can sort it and add "None" to it
+    currentColorAttributes = [...currentColorAttributes];
+
+    if (!currentColorAttributes) {
+      return;
+    }
+
+    // Sort by alphabetical order (with smart numeric sorting)
+    // https://stackoverflow.com/a/38641281/10013136
+    currentColorAttributes.sort((a, b) =>
+      a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" })
+    );
+
+    // Append "None" option at the beginning
+    currentColorAttributes.unshift("None");
+
+    // Attributes of current color dropdown (keep this outside advanced)
+    this.gui
+      .add(currentLayerInstance, "selectedAttribute", currentColorAttributes)
+      .onChange((attribute: string) => {
+        currentLayerInstance.selectAttribute(attribute);
+      })
+      .name("Highlight");
+    // As of now since lil-gui doesn't have
+    // multi-select dropdowns, we can't have
+    // multiple attributes selected at once.
   }
 
   private setupAdvancedControls() {
