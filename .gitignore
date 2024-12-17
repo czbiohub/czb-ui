@@ -37,3 +37,6 @@ packages/*/dist
 !pacakges/**/.yalc/dist
 storybook-static
 .vercel
+
+# python stuff
+.venv

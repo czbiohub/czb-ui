@@ -24,6 +24,15 @@
   "dependencies": {
     "@loaders.gl/core": "^3.4.1",
     "@loaders.gl/images": "^3.4.1",
-    "deck.gl": "^8.9.1"
+    "comlink": "^4.4.1",
+    "d3": "^7.9.0",
+    "deck.gl": "^9.0.33",
+    "lil-gui": "^0.19.2",
+    "three": "^0.163.0",
+    "zarr": "^0.6.3"
+  },
+  "devDependencies": {
+    "@types/d3": "^7.4.3",
+    "@types/three": "^0.163.0"
   }
 }

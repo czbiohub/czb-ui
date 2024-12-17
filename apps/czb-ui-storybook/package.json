@@ -11,6 +11,7 @@
     "@czb-ui/biohub-logos": "*",
     "@czb-ui/core": "*",
     "@czb-ui/forms": "*",
+    "@czb-ui/viz": "*",
     "@emotion/css": "^11.9.0",
     "@emotion/react": "^11.9.3",
     "@emotion/styled": "^11.9.3",
