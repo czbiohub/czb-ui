@@ -2,6 +2,9 @@ import React, { useState, useEffect, useMemo } from "react";
 import { ImageLoader } from "@loaders.gl/images";
 import { load } from "@loaders.gl/core";
 import LoadingComponent from "../LoadingComponent/LoadingComponent";
+import DeckGL from "@deck.gl/react";
+import { BitmapLayer } from "@deck.gl/layers";
+import { OrthographicView, OrthographicViewState } from "@deck.gl/core";
 
 interface imageDimensions {
   width: number;
@@ -83,17 +86,19 @@ export default function Image({ imageUrl, imageDimensions }: ImageProps) {
   );
   const startingZoomLevel = Math.min(zoomLevelToFitWidth, zoomLevelToFitHeight);
 
+  const INITIAL_VIEW_STATE: OrthographicViewState = {
+    target: [imageDimensions.width / 2, imageDimensions.height / 2, 0], // Start at the center of the image
+    zoom: startingZoomLevel,
+    minZoom: startingZoomLevel - 1,
+  };
+
   return (
     <>
       {isLoading && <LoadingComponent />}
       <DeckGL
         views={[new OrthographicView({ id: "ortho" })]}
         controller={true}
-        initialViewState={{
-          target: [imageDimensions.width / 2, imageDimensions.height / 2, 0], // Start at the center of the image
-          zoom: startingZoomLevel,
-          minZoom: startingZoomLevel - 1,
-        }}
+        initialViewState={{ ortho: INITIAL_VIEW_STATE }}
         layers={[layer]}
       />
     </>
